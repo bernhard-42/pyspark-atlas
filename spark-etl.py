@@ -37,21 +37,21 @@ owner = "etl"
 # (2) This is the actual ETL Spark function and its source will be copied into ATLAS Lineage
 #
 def etl():
-	def saveToHiveAsORC(df, database, table):
-	    tempTable = "%s_tmp_%d" % (table, (time.time()))
-	    df.registerTempTable(tempTable)
-	    sqlContext.sql("create table %s.%s stored as ORC as select * from %s" % (database, table, tempTable))
-	    sqlContext.dropTempTable(tempTable)
+    def saveToHiveAsORC(df, database, table):
+        tempTable = "%s_tmp_%d" % (table, (time.time()))
+        df.registerTempTable(tempTable)
+        sqlContext.sql("create table %s.%s stored as ORC as select * from %s" % (database, table, tempTable))
+        sqlContext.dropTempTable(tempTable)
 
-	employees   = sqlContext.sql("select * from %s.%s" % (sourceDB, sourceTables[0]))  # -> employees.employees
-	departments = sqlContext.sql("select * from %s.%s" % (sourceDB, sourceTables[1]))  # -> employees.departments
-	dept_emp    = sqlContext.sql("select * from %s.%s" % (sourceDB, sourceTables[2]))  # -> employees.dept_emp
+    employees   = sqlContext.sql("select * from %s.%s" % (sourceDB, sourceTables[0]))  # -> employees.employees
+    departments = sqlContext.sql("select * from %s.%s" % (sourceDB, sourceTables[1]))  # -> employees.departments
+    dept_emp    = sqlContext.sql("select * from %s.%s" % (sourceDB, sourceTables[2]))  # -> employees.dept_emp
 
-	emp_dept_flat = employees.withColumn("full_name", concat(employees["last_name"], lit(", "), employees["first_name"]))
-	emp_dept_flat = emp_dept_flat.select("full_name", "emp_no").join(dept_emp,"emp_no").join(departments, "dept_no")
-	saveToHiveAsORC(emp_dept_flat, targetDB, targetTable)
+    emp_dept_flat = employees.withColumn("full_name", concat(employees["last_name"], lit(", "), employees["first_name"]))
+    emp_dept_flat = emp_dept_flat.select("full_name", "emp_no").join(dept_emp,"emp_no").join(departments, "dept_no")
+    saveToHiveAsORC(emp_dept_flat, targetDB, targetTable)
 
-	return emp_dept_flat
+    return emp_dept_flat
 
 
 #
@@ -81,6 +81,6 @@ print("Adding Lineage to Atlas (using the code in function 'etl')")
 
 atlas = Atlas(cluster, atlasHost, user, password)
 atlas.lineage.createHiveToHive(sourceDB, sourceTables, targetDB, targetTable, targetColumns, \
-							   etl, usedSparkPackages, atlas.timestamp(startTime), atlas.timestamp(endTime), owner)
+                               etl, usedSparkPackages, atlas.timestamp(startTime), atlas.timestamp(endTime), owner)
 
 print("Done")
