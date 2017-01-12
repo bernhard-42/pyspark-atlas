@@ -54,3 +54,13 @@ def etl():
 ```
 
 Rest see [spark-etl.py](spark-etl.py)
+
+
+## Result:
+
+1) Lineage Graph
+![Lineage-graph.png](Lineage-graph.png)
+
+2) ETL Process properties
+![etl-process-sample.png](etl-process-sample.png)
+
